@@ -21,10 +21,12 @@ namespace AutomaticBackpackRefresher
     {
         public string steamId64 { get; set; }
         public string backpackToken { get; set; }
-        public UserConfig(string _steamId64, string _backpackToken)
+        public int fallbackDelay { get; set; }
+        public UserConfig(string steamId64, string backpackToken, int fallbackDelay)
         {
-            steamId64 = _steamId64;
-            backpackToken = _backpackToken;
+            this.steamId64 = steamId64;
+            this.backpackToken = backpackToken;
+            this.fallbackDelay = fallbackDelay;
         }
     }
     internal class Program
@@ -58,8 +60,8 @@ namespace AutomaticBackpackRefresher
             if (secondsToSleep <= 0)
             {
                 // this should only happen if the API returns a bad next_update value
-                // to prevent a flood of requests if this happens just sleep for 10 seconds
-                secondsToSleep = 10;
+                // to prevent a flood of requests if this happens just sleep for a user defined amount of time
+                secondsToSleep = userConfig.fallbackDelay;
             }
 
             DebugPrint($"Sleeping for {secondsToSleep} seconds...");
@@ -120,7 +122,7 @@ namespace AutomaticBackpackRefresher
             Console.Write("Please enter your Backpack.tf token: ");
             string backpackToken = Console.ReadLine();
 
-            userConfig = new UserConfig(steamId64, backpackToken);
+            userConfig = new UserConfig(steamId64, backpackToken, 10);
         }
 
         static void LoadConfig()
@@ -140,7 +142,7 @@ namespace AutomaticBackpackRefresher
         static void Main(string[] args)
         {
             Console.Title = "Automatic Backpack Refresher — www.Ill5.com (c) 2023";
-            DebugPrint("Automatic Backpack Refresher — www.Ill5.com (c) 2023\n");
+            Console.WriteLine("Automatic Backpack Refresher — www.Ill5.com (c) 2023\n");
 
             LoadConfig();
 
