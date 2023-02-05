@@ -45,8 +45,10 @@ namespace AutomaticBackpackRefresher
 
         static void DebugPrint(string message)
         {
+#if DEBUG
             // Get two methods up in the call stack since we use up one call here
             Console.WriteLine($"{GetMethodName(2)}: {message}");
+#endif
         }
 
         static void SleepUntilUnixTimestamp(int timestamp) // BUG: 2038
@@ -54,7 +56,9 @@ namespace AutomaticBackpackRefresher
             int secondsToSleep = timestamp - Convert.ToInt32(DateTimeOffset.Now.ToUnixTimeSeconds());
 
             if (secondsToSleep <= 0)
+            {
                 return;
+            }
 
             DebugPrint($"Sleeping for {secondsToSleep} seconds...");
 
@@ -80,7 +84,7 @@ namespace AutomaticBackpackRefresher
                 return;
             }
 
-            if (newResponse.last_update == newResponse.timestamp)
+            if (newResponse.last_update == newResponse.current_time)
             {
                 DebugPrint("Refreshed!");
             }
@@ -120,7 +124,9 @@ namespace AutomaticBackpackRefresher
         static void LoadConfig()
         {
             if (!File.Exists(configFile))
+            {
                 GetConfigFromCommandLine();
+            }
             else
             {
                 userConfig = JsonConvert.DeserializeObject<UserConfig>(File.ReadAllText(configFile));
@@ -142,8 +148,11 @@ namespace AutomaticBackpackRefresher
             {
                 RefreshBackpack();
 
+                // i don't like how i'm doing this
                 if (lastResponse?.next_update.HasValue == false)
+                {
                     continue;
+                }
 
                 SleepUntilUnixTimestamp(lastResponse.next_update.Value);
             }
