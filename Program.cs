@@ -57,7 +57,9 @@ namespace AutomaticBackpackRefresher
 
             if (secondsToSleep <= 0)
             {
-                return;
+                // this should only happen if the API returns a bad next_update value
+                // to prevent a flood of requests if this happens just sleep for 10 seconds
+                secondsToSleep = 10;
             }
 
             DebugPrint($"Sleeping for {secondsToSleep} seconds...");
